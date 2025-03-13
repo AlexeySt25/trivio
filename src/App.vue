@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import aviaVendorsForm from '@/components/aviaVendorsForm.vue'
+import { aviaVendorsForm } from '@/components/aviaVendorsForm'
 import { storeToRefs } from 'pinia'
 import { useAviaFormStore } from '@/stores/aviaForm'
 const aviaFormStore = useAviaFormStore()
 const { forms } = storeToRefs(aviaFormStore)
+
+const submitForm = async (formIdx: number) => aviaFormStore.submitForm(formIdx)
+const removeForm = async (formIdx: number) => aviaFormStore.removeForm(formIdx)
 </script>
 
 <template>
@@ -12,24 +15,32 @@ const { forms } = storeToRefs(aviaFormStore)
       <h1 class="tw-inline tw-text-xl tw-font-bold">Управление авиапоставщиками</h1>
       <button
         @click="aviaFormStore.addForm()"
-        class="tw-bg-blue tw-text-white tw-font-medium tw-p-sm tw-rounded-lg"
+        class="tw-bg-blue tw-text-white tw-font-medium tw-p-sm tw-rounded-lg tw-min-w-[50px]"
         type="button"
       >
-        + Добавить
+        + <span class="tw-hidden lg:tw-inline">Добавить</span>
       </button>
     </header>
 
     <div class="tw-bg-white tw-w-full tw-p-sm tw-rounded-md tw-flex tw-flex-col tw-gap-[50px]">
       <h1 v-if="!forms.length" class="tw-text-lg tw-text-center">Поставщики отсутствуют</h1>
       <TransitionGroup name="aviaForm">
-        <!-- Компонет формы -->
-        <avia-vendors-form v-for="(form, index) in forms" :key="index" :form="form" :idx="index" />
+        <!-- Компонент формы -->
+        <avia-vendors-form
+          v-for="(_, index) in forms"
+          v-model="forms[index]"
+          @submit-form="(formIdx) => submitForm(formIdx)"
+          @remove-form="(formIdx) => removeForm(formIdx)"
+          :key="index"
+          :form-idx="index"
+        />
       </TransitionGroup>
     </div>
   </section>
 </template>
 
 <style scoped>
+/* Стили для анимации TransitionGroup */
 .aviaForm-enter-active,
 .aviaForm-leave-active {
   transition: all 0.5s ease;

@@ -5,7 +5,7 @@ import type { Form } from '@/types/aviaForm'
 export const useAviaFormStore = defineStore('aviaForm', () => {
   const forms = reactive<Form[]>([])
 
-  const submitForm = (idx: number, form: Form) => {
+  const syncFormWithStorage = () => {
     const savedForms = localStorage.getItem('avia-forms')
     if (savedForms) {
       try {
@@ -13,18 +13,22 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
         if (Array.isArray(parsedForms)) {
           forms.splice(0, forms.length, ...parsedForms) // Обновляем массив
         }
-        forms[idx] = form
       } catch (e: unknown) {
         throw Error(`Ошибка при чтении из localStorage: ${e}`)
       }
     }
+  }
 
+  // Записываем содержимое формы
+  const submitForm = (idx: number) => {
+    const form: Form = forms[idx]
+    syncFormWithStorage()
+    forms[idx] = form
     localStorage.setItem('avia-forms', JSON.stringify(forms))
   }
 
+  // Добавляем форму в ui для ввода данных
   const addForm = () => {
-    // forms[idx] = form
-    // // Сохраняем в localStorage только при вызове submitForm
     forms.push({
       aviaVendorDescription: '',
       availableAviaCompanies: [],
@@ -34,6 +38,7 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
     })
   }
 
+  // Удаляем форму
   const removeForm = (idx: number) => {
     // Проверяем, есть ли данные в localStorage
     const savedForms = localStorage.getItem('avia-forms')
@@ -41,13 +46,13 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
       try {
         const parsedForms = JSON.parse(savedForms)
         if (Array.isArray(parsedForms) && parsedForms[idx]) {
-          // Если форма есть в localStorage, удаляем её оттуда
+          // Если форма есть в localStorage, удаляем её из parsedForms
           parsedForms.splice(idx, 1)
           // Обновляем localStorage
           localStorage.setItem('avia-forms', JSON.stringify(parsedForms))
         }
-      } catch (e) {
-        console.error('Ошибка при чтении из localStorage:', e)
+      } catch (e: unknown) {
+        throw Error(`Ошибка при чтении из localStorage: ${e}`)
       }
     }
 
@@ -56,19 +61,7 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
   }
 
   // Синхронизация с localStorage при монтировании
-  onMounted(() => {
-    const savedForms = localStorage.getItem('avia-forms')
-    if (savedForms) {
-      try {
-        const parsedForms: Form = JSON.parse(savedForms)
-        if (Array.isArray(parsedForms)) {
-          forms.splice(0, forms.length, ...parsedForms) // Обновляем массив
-        }
-      } catch (e) {
-        throw Error(`Ошибка при чтении из localStorage: ${e}`)
-      }
-    }
-  })
+  onMounted(() => syncFormWithStorage())
 
   return { forms, submitForm, addForm, removeForm }
 })

@@ -1,72 +1,38 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
-import { required, maxLength, helpers, alphaNum, requiredIf } from '@vuelidate/validators'
-import { ref, computed, reactive, watch, toRaw } from 'vue'
-import errorMessages from '@/components/errorMessages.vue'
-import { useAviaFormStore } from '@/stores/aviaForm'
+import { watch } from 'vue'
+import {
+  useTogglePasswordVisibility,
+  useAvailableAviaCompanies,
+  useCompanyTypes,
+  useValidationRules,
+} from '@/components/aviaVendorsForm/utils'
+import { errorMessages } from '@/components/aviaVendorsForm'
 import type { Form } from '@/types/aviaForm'
-const aviaFormStore = useAviaFormStore()
 
-type Props = { idx: number; form: Form }
+type Props = { formIdx: number; modelValue: Form }
+type Emit = {
+  submitForm: [id: number]
+  removeForm: [id: number]
+  'update:modelValue': [modelValue: Form]
+}
 const props = defineProps<Props>()
-
-const showPassword = ref(false)
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value
-}
-
-const changeAvailableAviaCompanies = (event: Event) => {
-  const inputValue: string = (event.target as HTMLInputElement)?.value
-  if (inputValue.includes(';')) {
-    form.availableAviaCompanies = inputValue.split(';').map((el) => ({
-      text: el,
-    }))
-  } else {
-    form.availableAviaCompanies = [{ text: inputValue }]
-  }
-}
-
-const changeCompanyTypes = (event: Event) => {
-  const inputValue: string = (event.target as HTMLInputElement)?.value
-  if (inputValue !== 'close') form.secretKey = null
-}
-
-const form = props.form
-
-const rules = {
-  form: {
-    aviaVendorDescription: {
-      $autoDirty: true,
-      required: helpers.withMessage(() => 'Это поле обязательно для заполнения', required),
-      maxLengthValue: helpers.withMessage(() => 'Не более 100 символов', maxLength(100)),
-    },
-    availableAviaCompanies: {},
-    vendorKey: {
-      $autoDirty: true,
-      required: helpers.withMessage(() => 'Это поле обязательно для заполнения', required),
-      maxLengthValue: helpers.withMessage(() => 'Не более 50 символов', maxLength(50)),
-    },
-    companyType: {},
-    secretKey: {
-      $autoDirty: true,
-      requiredIfFuction: helpers.withMessage(
-        () => 'Это поле обязательно для заполнения',
-        requiredIf(() => form.companyType === 'close'),
-      ),
-      alphaNum: helpers.withMessage(() => 'Допускаются только латиница и цифры', alphaNum),
-      maxLengthValue: helpers.withMessage(() => 'Не более 50 символов', maxLength(50)),
-    },
-  },
-}
-
+const emit = defineEmits<Emit>()
+const form = props.modelValue
+const { showPassword, togglePasswordVisibility } = useTogglePasswordVisibility()
+const { changeAvailableAviaCompanies } = useAvailableAviaCompanies(form)
+const { changeCompanyTypes } = useCompanyTypes(form)
+const { rules } = useValidationRules(form)
 const v$ = useVuelidate(rules, { form })
 
 const submitForm = async () => {
   const isFormValid = await v$.value.$validate()
-  aviaFormStore.submitForm(props.idx, form)
-  console.log('[submitForm] isFormCorrect ---> ', isFormValid)
-  console.log('FORM: ', toRaw(form))
+  if (isFormValid) emit('submitForm', props.formIdx)
 }
+
+watch(form, (newValue) => {
+  emit('update:modelValue', newValue)
+})
 </script>
 
 <template>
@@ -156,8 +122,8 @@ const submitForm = async () => {
       <error-messages :errors="v$.form.secretKey.$errors" />
     </div>
 
+    <!-- Кнопки -->
     <div class="tw-flex tw-flex-row lg:tw-grow tw-gap-sm">
-      <!-- Кнопка Сохранить -->
       <button
         @click="submitForm()"
         class="tw-grow tw-h-[40px] tw-bg-blue tw-text-white tw-font-medium tw-p-sm tw-rounded-lg lg:tw-mt-[20px]"
@@ -166,9 +132,8 @@ const submitForm = async () => {
         Сохранить
       </button>
 
-      <!-- Кнопка удалить -->
       <button
-        @click="aviaFormStore.removeForm(props.idx)"
+        @click="emit('removeForm', props.formIdx)"
         class="tw-flex tw-flex-row tw-justify-center tw-bg-red tw-h-[40px] tw-w-[40px] tw-text-white tw-rounded-md lg:tw-mt-[20px]"
         type="button"
       >
