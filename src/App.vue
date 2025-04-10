@@ -4,9 +4,15 @@ import { storeToRefs } from 'pinia'
 import { useAviaFormStore } from '@/stores/aviaForm'
 const aviaFormStore = useAviaFormStore()
 const { forms } = storeToRefs(aviaFormStore)
+import type { Form } from '@/types/aviaForm'
+
 
 const submitForm = async (formIdx: number) => aviaFormStore.submitForm(formIdx)
 const removeForm = async (formIdx: number) => aviaFormStore.removeForm(formIdx)
+function updateForm(updatedForm: Form) {
+  const index = forms.value.findIndex(f => f.uid === updatedForm.uid);
+  if (index !== -1) forms.value[index] = updatedForm;
+}
 </script>
 
 <template>
@@ -27,12 +33,13 @@ const removeForm = async (formIdx: number) => aviaFormStore.removeForm(formIdx)
       <TransitionGroup name="aviaForm">
         <!-- Компонент формы -->
         <avia-vendors-form
-          v-for="(_, index) in forms"
-          v-model="forms[index]"
+          v-for="form in forms"
+          :model-value="form"
+          @update:model-value="(updatedForm) => updateForm(updatedForm)"
           @submit-form="(formIdx) => submitForm(formIdx)"
           @remove-form="(formIdx) => removeForm(formIdx)"
-          :key="index"
-          :form-idx="index"
+          :key="form.uid"
+          :form-idx="form.uid"
         />
       </TransitionGroup>
     </div>

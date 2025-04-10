@@ -36,15 +36,15 @@ watch(form, (newValue) => {
 </script>
 
 <template>
-  <div
+  <form
     class="tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-gap-sm lg:tw-min-h-[70px] lg:tw-items-top"
   >
     <!-- Поле input: Описание авиапоставщика -->
     <div class="tw-flex tw-flex-col lg:tw-grow tw-basis-full">
-      <label for="description" class="tw-text-gray tw-text-sm">Описание авиапоставщика</label>
+      <label :for="'description' + props.formIdx" class="tw-text-gray tw-text-sm">Описание авиапоставщика</label>
       <input
         v-model="form.aviaVendorDescription"
-        id="description"
+        :id="'description' + props.formIdx"
         type="text"
         class="tw-h-[35px] tw-p-sm tw-rounded-lg tw-bg-whitesmoke"
       />
@@ -54,11 +54,11 @@ watch(form, (newValue) => {
 
     <!-- Поле input: Доступные авиакомпании -->
     <div class="tw-flex tw-flex-col lg:tw-grow">
-      <label for="availableAirlines" class="tw-text-gray tw-text-sm">Доступные авиакомпании</label>
+      <label :for="'availableAirlines' + props.formIdx" class="tw-text-gray tw-text-sm">Доступные авиакомпании</label>
       <input
         :value="form.availableAviaCompanies.map((el) => el.text).join(';')"
         @input="(event) => changeAvailableAviaCompanies(event)"
-        id="availableAirlines"
+        :id="'availableAirlines' + props.formIdx"
         type="text"
         placeholder=""
         class="tw-h-[35px] tw-p-sm tw-rounded-lg tw-border tw-bg-whitesmoke tw-outline-none focus:tw-border-blue-500"
@@ -68,10 +68,10 @@ watch(form, (newValue) => {
 
     <!-- Поле input: Ключ поставщика -->
     <div class="tw-flex tw-flex-col lg:tw-grow-2">
-      <label for="vendorKey" class="tw-text-gray tw-text-sm">Ключ поставщика</label>
+      <label :for="'vendorKey' + props.formIdx" class="tw-text-gray tw-text-sm">Ключ поставщика</label>
       <input
         v-model="form.vendorKey"
-        id="vendorKey"
+        :id="'vendorKey' + props.formIdx"
         type="text"
         placeholder=""
         class="tw-h-[35px] tw-p-sm tw-rounded-lg tw-border tw-bg-whitesmoke tw-outline-none focus:tw-border-blue-500"
@@ -81,12 +81,12 @@ watch(form, (newValue) => {
 
     <!-- Поле select: Тип компании -->
     <div class="tw-flex tw-flex-col lg:tw-grow">
-      <label for="companyType" class="tw-text-gray tw-text-sm">Тип компании</label>
+      <label :for="'companyType' + props.formIdx" class="tw-text-gray tw-text-sm">Тип компании</label>
       <select
         v-model="form.companyType"
         @change="(event) => changeCompanyTypes(event)"
         @blur="v$.form.companyType.$touch()"
-        id="companyType"
+        :id="'companyType' + props.formIdx"
         class="tw-p-sm tw-rounded-lg tw-bg-whitesmoke"
       >
         <option
@@ -103,13 +103,13 @@ watch(form, (newValue) => {
 
     <!-- Поле secret key -->
     <div v-show="form.companyType === 'close'" class="tw-flex tw-flex-col lg:tw-grow-2">
-      <label for="companyType" class="tw-text-gray tw-text-sm">Secret Key</label>
+      <label :for="'secretKey' + props.formIdx" class="tw-text-gray tw-text-sm">Secret Key</label>
       <div
         class="tw-bg-whitesmoke tw-flex tw-rounded-lg tw-flex-row tw-justify-between tw-h-[35px]"
       >
         <input
           v-model="form.secretKey"
-          id="secretKey"
+          :id="'secretKey' + props.formIdx"
           :type="showPassword ? 'text' : 'password'"
           placeholder="****************"
           class="tw-p-sm"
@@ -140,5 +140,5 @@ watch(form, (newValue) => {
         <img width="20px" src="/icons/delete.svg" alt="удалить" />
       </button>
     </div>
-  </div>
+  </form>
 </template>

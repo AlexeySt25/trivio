@@ -8,13 +8,13 @@ const useValidationRules = (form: Form) => {
       aviaVendorDescription: {
         $autoDirty: true,
         required: helpers.withMessage(() => 'Это поле обязательно для заполнения', required),
-        maxLengthValue: helpers.withMessage(() => 'Не более 100 символов', maxLength(100)),
+        maxLengthValue: helpers.withMessage(() => 'Не более 15 символов', maxLength(15)),
       },
       availableAviaCompanies: {},
       vendorKey: {
         $autoDirty: true,
         required: helpers.withMessage(() => 'Это поле обязательно для заполнения', required),
-        maxLengthValue: helpers.withMessage(() => 'Не более 50 символов', maxLength(50)),
+        maxLengthValue: helpers.withMessage(() => 'Не более 7 символов', maxLength(7)),
       },
       companyType: {},
       secretKey: {
@@ -24,7 +24,7 @@ const useValidationRules = (form: Form) => {
           requiredIf(() => form.companyType === 'close'),
         ),
         alphaNum: helpers.withMessage(() => 'Допускаются только латиница и цифры', alphaNum),
-        maxLengthValue: helpers.withMessage(() => 'Не более 50 символов', maxLength(50)),
+        maxLengthValue: helpers.withMessage(() => 'Не более 10 символов', maxLength(10)),
       },
     },
   }))

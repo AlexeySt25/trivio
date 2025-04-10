@@ -20,7 +20,10 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
   }
 
   // Записываем содержимое формы
-  const submitForm = (idx: number) => {
+  const submitForm = (uid: number) => {
+    const idx = forms.findIndex(f => f.uid === uid);
+    if (idx === -1) return
+
     const form: Form = forms[idx]
     syncFormWithStorage()
     forms[idx] = form
@@ -30,6 +33,7 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
   // Добавляем форму в ui для ввода данных
   const addForm = () => {
     forms.push({
+      uid: Date.now(),
       aviaVendorDescription: '',
       availableAviaCompanies: [],
       vendorKey: '',
@@ -39,13 +43,15 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
   }
 
   // Удаляем форму
-  const removeForm = (idx: number) => {
+  const removeForm = (uid: number) => {
     // Проверяем, есть ли данные в localStorage
     const savedForms = localStorage.getItem('avia-forms')
     if (savedForms) {
       try {
-        const parsedForms = JSON.parse(savedForms)
-        if (Array.isArray(parsedForms) && parsedForms[idx]) {
+        const parsedForms: Form[] = JSON.parse(savedForms)
+        const idx = parsedForms.findIndex(f => f.uid === uid)
+        const isFormExist = idx === -1 ? false : true
+        if (Array.isArray(parsedForms) && isFormExist) {
           // Если форма есть в localStorage, удаляем её из parsedForms
           parsedForms.splice(idx, 1)
           // Обновляем localStorage
@@ -57,6 +63,7 @@ export const useAviaFormStore = defineStore('aviaForm', () => {
     }
 
     // Удаляем форму из store
+    const idx = forms.findIndex(f => f.uid === uid)
     forms.splice(idx, 1)
   }
 
